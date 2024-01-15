@@ -1,0 +1,50 @@
+__CMD__ = "connections"
+__ALIAS__ = ["c"]
+__USAGE__ = __CMD__
+__DESCRIPTION__ = "List all connections"
+__CATEGORY__ = "CySec"
+
+connectionsCmd = {}
+connectionsCmd.cmd = __CMD__
+connectionsCmd.usage = __USAGE__
+connectionsCmd.description = __DESCRIPTION__
+connectionsCmd.alias = __ALIAS__
+connectionsCmd.category = __CATEGORY__
+
+connectionsCmd.execute = function(args)
+	options = []
+	showConnections(globals.activeConnections, options, 0)
+	
+	newConnection = listSelection("Change connection to:", options, true)
+	if newConnection == null then return
+	changeConnection(newConnection.hash)
+end function
+
+showConnections = function(holder, list, depth)
+	depthText = ""
+	for i in range(0, depth)
+		depthText = depthText + "-"
+	end for
+	depthText = depthText + ">"
+	
+	if globals.activeConnection == holder.connection.hash then
+		depthText = colors.green(depthText) 
+	else
+		depthText = colors.gray(depthText)
+	end if
+		
+	logText = depthText + " " + colors.gray("[") + colorConnectionType(typeof(holder.connection.raw)) + colors.gray("] ") + colorConnectionLevel(holder.connection.user) + colors.gray("@") + anonIp(holder.connection.publicIp, 2) + colors.gray(" - ") + holder.connection.localIp
+	
+	list.push({
+		"label": logText,
+		"value": holder.connection,
+	})
+	
+	if holder.children.len > 0 then
+		for ch in holder.children.values
+			showConnections(ch, list, depth + 1)
+		end for
+	end if
+end function
+
+cmdHandler.register(__CMD__, connectionsCmd)
