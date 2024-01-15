@@ -11,7 +11,7 @@ shell = get_shell()
 computer = shell.host_computer()
 fileHandle = computer.File(current_path())
 
-templateFile = getRelativeFile(fileHandle, "_templates/command.src")
+templateFile = getRelativeFile(fileHandle, "_templates/command.templ")
 if templateFile == null then
 	console.log("Did not find template")
 	exit()
