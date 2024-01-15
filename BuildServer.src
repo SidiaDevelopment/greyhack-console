@@ -1,0 +1,152 @@
+import_code("/pollux/lib/colors.src")
+import_code("/pollux/lib/logger.src")
+import_code("/pollux/lib/input.src")
+import_code("/pollux/lib/file.src")
+import_code("/pollux/lib/info.src")
+
+__NAME__ = "BuildServer"
+__VERSION__ = "1.0.0"
+__AUTHOR__ = "SidiaDev"
+
+displayInfo()
+
+logger = buildLogger(__NAME__)
+
+currentShell = get_shell()
+currentComputer = currentShell.host_computer()
+
+fileHandle = null
+libHandle = null
+commandsHandle = null
+
+clear_screen()
+logger.log("Started build system")
+
+fileCondition = fileConditionBuilder(currentComputer)
+fileTransform = fileTransformBuilder(currentComputer)
+fileHandle = conditionalInput("Enter path: ", @fileCondition, @fileTransform)
+if fileHandle == null then
+	exit("fileHandle corrupt")
+end if
+
+scanLib = conditionalLoggerInput("Scan /lib directory for changes? (Y/N)", @yesNoCondition, @yesNoTransform, false, true)
+
+if scanLib == true then
+	libHandle = currentComputer.File(fileHandle.parent.path + "/lib")
+	if libHandle == null then
+		logger.error("/lib not found, skipping lib check")
+		scanLib = false
+	else
+		if libHandle.is_folder() == false then
+			logger.error("/lib is not a folder, skipping lib check")
+			scanLib = false
+		end if
+	end if
+end if
+
+scanCommands = conditionalLoggerInput("Scan /commands directory for changes? (Y/N)", @yesNoCondition, @yesNoTransform, false, true)
+if scanCommands == true then
+	commandsHandle = currentComputer.File(fileHandle.parent.path + "/commands")
+	if commandsHandle == null then
+		logger.error("/commands not found, skipping commands check")
+		scanCommands = false
+	else
+		if commandsHandle.is_folder() == false then
+			logger.error("/commands is not a folder, skipping commands check")
+			scanCommands = false
+		end if
+	end if
+end if
+
+libContents = {}
+updateLibs = function()
+	files = libHandle.get_files()
+	for file in files
+		libContents[file.name] = file.get_content()
+	end for
+end function
+
+checkLibs = function() 
+	files = libHandle.get_files()
+	for file in files
+		if libContents.indexes.indexOf(file.name) == null then
+			logger.log("New lib <b>" + file.name + "</b> detected, rebuilding...")
+			return false
+		end if
+		
+		if libContents[file.name] != file.get_content() then
+			logger.log("Updated lib <b>" + file.name + "</b> detected, rebuilding...")
+			return false
+		end if
+	end for
+end function
+
+commandContents = {}
+updateCommands = function()
+	files = commandsHandle.get_files()
+	for file in files
+		commandContents[file.name] = file.get_content()
+	end for
+end function
+
+checkCommands = function() 
+	files = commandsHandle.get_files()
+	for file in files
+		if commandContents.indexes.indexOf(file.name) == null then
+			logger.log("New command <b>" + file.name + "</b> detected, rebuilding...")
+			return false
+		end if
+		
+		if commandContents[file.name] != file.get_content() then
+			logger.log("Updated command <b>" + file.name + "</b> detected, rebuilding...")
+			return false
+		end if
+	end for
+end function
+
+logger.log("Loaded file " + fileHandle.name)
+if scanLib == true then
+	logger.log("Loaded directory " + libHandle.path)
+end if
+
+if scanCommands == true then
+	logger.log("Loaded directory " + commandsHandle.path)
+end if
+
+fileContents = null
+
+buildDirHandle = currentComputer.File(fileHandle.parent.path + "/build")
+if buildDirHandle == null then
+	currentComputer.create_folder(fileHandle.parent.path, "build")
+end if
+
+checkFile = function()
+	if fileContents != fileHandle.get_content() then
+		logger.log("Changes detected, rebuilding...")
+		return false
+	end if
+	return true
+end function
+
+logger.log("Watching...")
+while 1==1
+	if checkFile() == false or (scanLib == true and checkLibs() == false) or (scanCommands == true and checkCommands() == false) then
+		result = currentShell.build(fileHandle.path, fileHandle.parent.path + "/build/")
+		if result.len == 0 then
+			logger.log("Build complete -> <b>" + colors.green(fileHandle.parent.path + "/build/" + fileHandle.name.remove(".src")) + "</b>")
+		else
+			logger.error(result)
+		end if
+		
+		if scanLib == true then
+			updateLibs()
+		end if
+	
+		if scanCommands == true then
+			updateCommands()
+		end if
+	
+		fileContents = fileHandle.get_content()
+	end if
+end while
+

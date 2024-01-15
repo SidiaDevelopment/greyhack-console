@@ -1,0 +1,29 @@
+__CMD__ = "cd"
+__USAGE__ = __CMD__ + " [path]"
+__DESCRIPTION__ = "Change directory to [path]"
+__CATEGORY__ = "Files"
+
+cdCmd = {}
+cdCmd.cmd = __CMD__
+cdCmd.usage = __USAGE__
+cdCmd.description = __DESCRIPTION__
+cdCmd.category = __CATEGORY__
+
+cdCmd.execute = function(args)
+	if args.len != 1 then
+		console.log(cdCmd.usage)
+		return
+	end if
+
+	parg = args[0]
+	currentHandle = globals.currentConnection.fileHandle
+	newHandle = getRelativeFolder(currentHandle, parg)
+	if newHandle == null then
+		console.log("Path not found")
+		return
+	end if
+	
+	globals.currentConnection.fileHandle = newHandle
+end function
+
+cmdHandler.register(__CMD__, cdCmd)

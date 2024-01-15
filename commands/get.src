@@ -1,0 +1,58 @@
+__CMD__ = "get"
+__USAGE__ = __CMD__ + " [path] (target-path)"
+__DESCRIPTION__ = "Copy file to local"
+__CATEGORY__ = "Servers"
+
+getCmd = {}
+getCmd.cmd = __CMD__
+getCmd.usage = __USAGE__
+getCmd.description = __DESCRIPTION__
+getCmd.category = __CATEGORY__
+
+getCmd.execute = function(args)
+	if args.len < 1 then
+		console.log(getCmd.usage)
+		return
+	end if
+
+	parg = args[0]
+	currentHandle = globals.currentConnection.fileHandle
+	fileHandle = getRelativeHandle(currentHandle, parg)
+	if fileHandle == null then
+		console.log("File not found")
+		return
+	end if
+	
+	if not fileHandle.has_permission("r") then
+		console.log("No permission.")
+		return
+	end if
+	remoteShell = globals.currentConnection.shell
+	localShell = globals.localConnection.shell
+	localFile = globals.localConnection.fileHandle
+	if args.len >= 2 then
+		argPath = args[1]
+		argFile = getRelativeFolder(localFile, argPath)
+		if argFile == null then
+			console.log("Local directory not found")
+			return
+		end if
+	
+		localFile = argFile
+	end if
+	
+	if not localFile.has_permission("w") then
+		console.log("No write permission on local directory")
+		return
+	end if
+
+	result = remoteShell.scp(fileHandle.path, localFile.path, localShell)
+	if typeof(result) == "string" then
+		console.log("Error while downloading file: " + result)
+	else
+		console.log(console.bold(fileHandle.name) + " downloaded succesfully")
+	end if
+	console.rebuild()
+end function
+
+cmdHandler.register(__CMD__, getCmd)

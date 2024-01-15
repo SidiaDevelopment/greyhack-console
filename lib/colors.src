@@ -1,0 +1,39 @@
+colors = {  }
+colors._ = function(c="", t="")
+	return "<color="+c+">"+t+"</color>"
+end function
+colors.__ = function(c="", t="")
+	print(colors._(c, t))
+end function
+
+colors.green = function(t)
+	return colors._("green", t)
+end function
+
+colors.red = function(t)
+	return colors._("red", t)
+end function
+
+colors.yellow = function(t)
+	return colors._("yellow", t)
+end function
+
+colors.blue = function(t)
+	return colors._("blue", t)
+end function
+
+colors.white = function(t)
+	return colors._("white", t)
+end function
+
+colors.gray = function(t)
+	return colors._("#737373", t)
+end function
+
+colors.pollux = function(t)
+	return colors._("#0095eb", t)
+end function
+
+colors.pollux2 = function(t)
+	return colors._("#ff6a00", t)
+end function

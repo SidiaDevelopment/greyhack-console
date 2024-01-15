@@ -1,0 +1,16 @@
+__CMD__ = "rebuild"
+__USAGE__ = __CMD__
+__DESCRIPTION__ = "Rebuild console to remove internal output"
+__CATEGORY__ = "Misc."
+
+rebuildCmd = {}
+rebuildCmd.cmd = __CMD__
+rebuildCmd.usage = __USAGE__
+rebuildCmd.description = __DESCRIPTION__
+rebuildCmd.category = __CATEGORY__
+
+rebuildCmd.execute = function(args)
+	console.rebuild()
+end function
+
+cmdHandler.register(__CMD__, rebuildCmd)

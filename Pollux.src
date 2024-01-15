@@ -1,0 +1,54 @@
+import_code("lib/colors.src")
+import_code("lib/logger.src")
+import_code("lib/input.src")
+import_code("lib/file.src")
+import_code("lib/info.src")
+import_code("lib/lib.src")
+import_code("lib/console.src")
+import_code("lib/connection.src")
+import_code("lib/commands.src")
+import_code("lib/iptools.src")
+import_code("lib/json.src")
+import_code("lib/addons.src")
+import_code("commands/scan.src")
+import_code("commands/clear.src")
+import_code("commands/ls.src")
+import_code("commands/pwd.src")
+import_code("commands/cd.src")
+import_code("commands/cat.src")
+import_code("commands/help.src")
+import_code("commands/about.src")
+import_code("commands/server.src")
+import_code("commands/rebuild.src")
+import_code("commands/connections.src")
+import_code("commands/quit.src")
+import_code("commands/ssh.src")
+import_code("commands/shell.src")
+import_code("commands/hack.src")
+import_code("commands/rm.src")
+import_code("commands/get.src")
+import_code("commands/put.src")
+import_code("commands/echo.src")
+import_code("commands/addons.src")
+
+__NAME__ = "Pollux"
+__VERSION__ = "1.0.0"
+__AUTHOR__ = "SidiaDev"
+
+displayInfo()
+logger = buildLogger(__NAME__)
+
+init(getConnection(get_shell()))
+globals.localConnection = {} + globals.currentConnection
+globals.localConnection.fileHandle = globals.localConnection.computer.File(current_path)
+clear_screen()
+addons.load()
+while 1==1
+	command = console.input()
+	if command == "" then
+		continue
+	end if
+	
+	parsedCommand = cmdHandler.parse(command)
+	cmdHandler.execute(parsedCommand.cmd, parsedCommand.args)
+end while

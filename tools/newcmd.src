@@ -1,0 +1,33 @@
+import_code("../lib/file.src")
+import_code("../lib/console.src")
+import_code("../lib/colors.src")
+
+if params.len < 1 then
+	console.log("newcmd [name]")
+	exit()
+end if
+
+shell = get_shell()
+computer = shell.host_computer()
+fileHandle = computer.File(current_path())
+
+templateFile = getRelativeFile(fileHandle, "_templates/command.src")
+if templateFile == null then
+	console.log("Did not find template")
+	exit()
+end if
+
+newName = params[0]
+targetPath = getRelativeFolder(fileHandle, "commands")
+createResult = computer.touch(targetPath.path, newName + ".src")
+if typeof(createResult) == "string" then
+	console.log("There was an error when creating the file: " + createResult)
+	exit()
+end if
+
+targetFile = getRelativeFile(fileHandle, "commands/" + newName + ".src")
+content = templateFile.get_content()
+content = content.replace("\$1", newName)
+
+targetFile.set_content(content)
+console.log("Done")

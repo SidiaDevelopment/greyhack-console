@@ -1,0 +1,6 @@
+displayInfo = function()
+	if params.len > 0 and params[0] == "-v" then
+		print(__NAME__ + " v" + __VERSION__ + " by " + __AUTHOR__)
+		exit()
+	end if
+end function

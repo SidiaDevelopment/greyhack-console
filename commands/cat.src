@@ -1,0 +1,32 @@
+__CMD__ = "cat"
+__USAGE__ = __CMD__ + " [path]"
+__DESCRIPTION__ = "Output contents of a file"
+__CATEGORY__ = "Files"
+
+catCmd = {}
+catCmd.cmd = __CMD__
+catCmd.usage = __USAGE__
+catCmd.description = __DESCRIPTION__
+catCmd.category = __CATEGORY__
+
+catCmd.execute = function(args)
+	if args.len != 1 then
+		console.log(catCmd.usage)
+		return
+	end if
+
+	parg = args[0]
+	currentHandle = globals.currentConnection.fileHandle
+	fileHandle = getRelativeFile(currentHandle, parg)
+	if not fileHandle.has_permission("r") then
+		console.log("No permission.")
+		return
+	end if
+	content = fileHandle.get_content()
+	lines = content.split("\n")
+	for line in lines
+		console.log(line)
+	end for
+end function
+
+cmdHandler.register(__CMD__, catCmd)

@@ -1,0 +1,79 @@
+console = {}
+HDASH = char(8212)
+VDASH = char(124)
+LB = char(10)
+
+console.input = function()
+	currentConnection = globals.currentConnection
+	text = colors.gray(HDASH + HDASH)
+	text = text + colors.gray("[") + colors.pollux(currentConnection.user) + colors.gray("@") + colors.pollux(anonIp(currentConnection.publicIp)) + colors.gray("]") 
+	text = text + colors.gray(HDASH + HDASH)
+	text = text + colors.gray("[") + colors.pollux(currentConnection.localIp) + colors.gray("]") 
+	text = text + colors.gray(HDASH + HDASH)
+	text = text + colors.gray("[") + colors.pollux(currentConnection.fileHandle.path) + colors.gray("]") 
+	text = text + "<voffset=-1.5em><pos=0>" + colors.gray(HDASH) + "</pos>"
+	text = text + colors.pollux("> ")
+	text = text + "</voffset>"
+	text = text + "<pos=-5><voffset=-0.5em>" + colors.gray(VDASH) + "</voffset></pos>"
+	text = text + "<pos=-5><voffset=-1em>" + colors.gray(VDASH) + "</voffset></pos>"
+	text = text + "<pos=24><voffset=-1.5em><color=#0095eb>"
+	ret = user_input(text)
+	console.history.push(text + ret)
+	return ret
+end function
+
+console.prompt = function(prompt, password = false, anyKey = false)
+	text = colors.gray(HDASH + HDASH)
+	text = text + "<pos=0>" + colors.gray(HDASH) + colors.gray(HDASH) + "</pos> " + console.bold(colors.pollux(prompt))
+	text = text + "<voffset=-1.5em><pos=0>" + colors.gray(HDASH) + "</pos>"
+	text = text + colors.pollux("> ")
+	text = text + "</voffset>"
+	text = text + "<pos=-5><voffset=-0.5em>" + colors.gray(VDASH) + "</voffset></pos>"
+	text = text + "<pos=-5><voffset=-1em>" + colors.gray(VDASH) + "</voffset></pos>"
+	text = text + "<pos=24><voffset=-1.5em><color=#0095eb>"
+	ret = user_input(text, password, anyKey)
+	console.history.push(text + ret)
+	return ret
+end function
+
+console.history = []
+console.log = function(text, log = true)
+	if log == true then
+		console.history.push(text)
+	end if
+	while console.history.len > 50
+		console.history.pull()
+	end while
+	console._internal_log(text)
+end function
+
+console._internal_log = function(text)
+	print(colors.pollux(text))
+end function
+
+console.rebuild = function()
+	clear_screen()
+	for item in console.history
+		console._internal_log(item)
+	end for
+end function
+
+console.bold = function(text)
+	return "<b>" + text + "</b>"
+end function
+
+console.underline = function(text)
+	return "<u>" + text + "</u>"
+end function
+
+console.alpha = function(alpha, text)
+	return "<alpha="+alpha+">" + text + "<alpha=#FF>"
+end function
+
+console.alpha50 = function(text)
+	return "<alpha=#88>" + text + "<alpha=#FF>"
+end function
+
+console.alpha20 = function(text)
+	return "<alpha=#55>" + text + "<alpha=#FF>"
+end function

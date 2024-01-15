@@ -1,0 +1,25 @@
+apt = include_lib("/lib/aptclient.so")
+
+loadLib = function(libName)
+	lib = include_lib(current_path + "/" + libName)
+	if not lib then
+		lib = include_lib("/lib/" + libName)
+	end if
+	
+	if not lib then
+		console.log("Downloading <b>" + libName + "</b> from remote")
+		result = apt.install(libName, current_path)
+		if result != 1 then
+			logger.error("Download failed")
+		end if
+		lib = include_lib(current_path + "/" + libName)
+		console.log("Downloaded <b>" + libName + "</b> from remote")
+	end if
+
+	if not lib then
+		logger.error("Could not fetch " + libName + ", exiting")
+		exit()
+	end if
+
+	return lib
+end function

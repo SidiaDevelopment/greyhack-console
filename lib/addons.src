@@ -1,0 +1,16 @@
+addons = {}
+
+addons.load = function()
+	localDir = globals.localConnection.fileHandle
+	addonDir = getRelativeFolder(localDir, "addons")
+	if addonDir == null then
+		return
+	end if
+	
+	shell = localConnection.shell
+	for file in addonDir.get_files()
+		if not file.is_binary() then continue
+		
+		shell.launch(file.path, "")
+	end for
+end function

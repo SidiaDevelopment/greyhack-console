@@ -1,0 +1,23 @@
+__CMD__ = "echo"
+__USAGE__ = __CMD__ + " [text]"
+__DESCRIPTION__ = "Echo the [text]"
+__ALIAS__ = []
+__CATEGORY__ = "Misc."
+
+echoCmd = {}
+echoCmd.cmd = __CMD__
+echoCmd.usage = __USAGE__
+echoCmd.description = __DESCRIPTION__
+echoCmd.alias = __ALIAS__
+echoCmd.category = __CATEGORY__
+
+echoCmd.execute = function(args)
+	if args.len < 1 then
+		console.log(echoCmd.usage)
+		return
+	end if
+	
+	console.log(args[0])
+end function
+
+cmdHandler.register(__CMD__, echoCmd)

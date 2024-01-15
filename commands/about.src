@@ -1,0 +1,16 @@
+__CMD__ = "about"
+__USAGE__ = __CMD__
+__DESCRIPTION__ = "Show about section"
+__CATEGORY__ = "Misc."
+
+aboutCmd = {}
+aboutCmd.cmd = __CMD__
+aboutCmd.usage = __USAGE__
+aboutCmd.description = __DESCRIPTION__
+aboutCmd.category = __CATEGORY__
+
+aboutCmd.execute = function(args)
+	console.log("Created by SidiaDev (www.sidiadev.com)")
+end function
+
+cmdHandler.register(__CMD__, aboutCmd)

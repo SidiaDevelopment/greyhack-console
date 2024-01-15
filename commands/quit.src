@@ -1,0 +1,18 @@
+__CMD__ = "quit"
+__USAGE__ = __CMD__
+__DESCRIPTION__ = "Quit current (and all child) connections"
+__ALIAS__ = ["q"]
+__CATEGORY__ = "CySec"
+
+quitCmd = {}
+quitCmd.cmd = __CMD__
+quitCmd.usage = __USAGE__
+quitCmd.description = __DESCRIPTION__
+quitCmd.category = __CATEGORY__
+quitCmd.alias = __ALIAS__
+
+quitCmd.execute = function(args)
+	disconnectCurrent()
+end function
+
+cmdHandler.register(__CMD__, quitCmd)

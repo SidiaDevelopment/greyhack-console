@@ -1,0 +1,16 @@
+__CMD__ = "pwd"
+__USAGE__ = __CMD__
+__DESCRIPTION__ = "Show current directory"
+__CATEGORY__ = "Files"
+
+pwdCmd = {}
+pwdCmd.cmd = __CMD__
+pwdCmd.usage = __USAGE__
+pwdCmd.description = __DESCRIPTION__
+pwdCmd.category = __CATEGORY__
+
+pwdCmd.execute = function(args)
+	console.log(globals.currentConnection.fileHandle.path)
+end function
+
+cmdHandler.register(__CMD__, pwdCmd)

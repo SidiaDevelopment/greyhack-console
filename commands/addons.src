@@ -1,0 +1,19 @@
+__CMD__ = "addons"
+__USAGE__ = __CMD__
+__DESCRIPTION__ = "Reload all addons"
+__ALIAS__ = []
+__CATEGORY__ = "Addons"
+
+addonsCmd = {}
+addonsCmd.cmd = __CMD__
+addonsCmd.usage = __USAGE__
+addonsCmd.description = __DESCRIPTION__
+addonsCmd.alias = __ALIAS__
+addonsCmd.category = __CATEGORY__
+
+addonsCmd.execute = function(args)
+	addons.load()
+	console.log("Reloaded addons")
+end function
+
+cmdHandler.register(__CMD__, addonsCmd)

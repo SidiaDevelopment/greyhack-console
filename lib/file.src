@@ -1,0 +1,163 @@
+fileConditionBuilder = function(computer)
+	globals.pc = computer
+	return function(value)
+		handle = globals.pc.File(value)
+		if handle == null then
+			logger.error("File not found")
+			return false
+		end if
+		if handle.is_folder then
+			logger.error("Folder found, file expected")
+			return false
+		end if
+	return true
+	end function
+end function
+
+fileTransformBuilder = function(computer)
+	globals.pc = computer
+	return function(value)
+		return globals.pc.File(value)
+	end function
+end function
+
+getRelativeFolder = function(curr, newPath)
+	newHandle = curr
+	pathParts = newPath.split("/")
+	
+	if newPath[:1] == "/" then
+		pathParts.pull()
+		while not newHandle.path == "/"
+			newHandle = newHandle.parent
+		end while
+	end if
+
+	if newPath[-1:] == "/" then
+		pathParts.pop()
+	end if
+
+	for part in pathParts
+		folders = newHandle.get_folders()
+		found = false
+		if part == "." then continue
+		if part == ".." then
+			if newHandle.path == "/" then continue
+			newHandle = newHandle.parent
+			continue
+		end if
+		for folder in folders
+			if folder.name == part then
+				newHandle = folder
+				found = true
+				break
+			end if
+		end for
+		if not found then
+			return null
+		end if
+	end for
+
+	return newHandle
+end function
+
+getRelativeFile = function(curr, newPath)
+	newHandle = curr
+	pathParts = newPath.split("/")
+	
+	if newPath[:1] == "/" then
+		pathParts.pull()
+		while not newHandle.path == "/"
+			newHandle = newHandle.parent
+		end while
+	end if
+
+	fileName = pathParts.pop()
+
+	for part in pathParts
+		folders = newHandle.get_folders()
+		found = false
+		if part == "." then continue
+		if part == ".." then
+			if newHandle.path == "/" then continue
+			newHandle = newHandle.parent
+			continue
+		end if
+		for folder in folders
+			if folder.name == part then
+				newHandle = folder
+				found = true
+				break
+			end if
+		end for
+		if not found then
+			return null
+		end if
+	end for
+
+	files = newHandle.get_files()
+	found = false
+	for file in files
+		if file.name == fileName then
+			newHandle = file
+			found = true
+			break
+		end if
+	end for
+
+	if not found then
+		return curr
+	end if
+	
+	return newHandle
+end function
+
+getRelativeHandle = function(curr, newPath)
+	newHandle = curr
+	pathParts = newPath.split("/")
+	
+	if newPath[:1] == "/" then
+		pathParts.pull()
+		while not newHandle.path == "/"
+			newHandle = newHandle.parent
+		end while
+	end if
+
+	fileName = pathParts.pop()
+
+	for part in pathParts
+		folders = newHandle.get_folders()
+		found = false
+		if part == "." then continue
+		if part == ".." then
+			if newHandle.path == "/" then continue
+			newHandle = newHandle.parent
+			continue
+		end if
+		for folder in folders
+			if folder.name == part then
+				newHandle = folder
+				found = true
+				break
+			end if
+		end for
+		if not found then
+			return null
+		end if
+	end for
+
+	files = newHandle.get_files() + newHandle.get_folders()
+	found = false
+	for file in files
+		if file.name == fileName then
+			newHandle = file
+			found = true
+			break
+		end if
+	end for
+
+	if not found then
+		return curr
+	end if
+	
+	return newHandle
+end function

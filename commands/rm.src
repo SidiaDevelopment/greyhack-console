@@ -1,0 +1,34 @@
+__CMD__ = "rm"
+__USAGE__ = __CMD__ + " [path]"
+__DESCRIPTION__ = "Remove a file"
+__CATEGORY__ = "Files"
+
+rmCmd = {}
+rmCmd.cmd = __CMD__
+rmCmd.usage = __USAGE__
+rmCmd.description = __DESCRIPTION__
+rmCmd.category = __CATEGORY__
+
+rmCmd.execute = function(args)
+	if args.len != 1 then
+		return
+	end if
+
+	parg = args[0]
+	currentHandle = globals.currentConnection.fileHandle
+	fileHandle = getRelativeFile(currentHandle, parg)
+	if not fileHandle.has_permission("w") then
+		console.log("No permission.")
+		return
+	end if
+	fName = fileHandle.name
+	result = fileHandle.delete()
+	if result != "" then
+		console.log(result)
+		return
+	end if
+	
+	console.log("Deleted " + console.bold(fName))
+end function
+
+cmdHandler.register(__CMD__, rmCmd)

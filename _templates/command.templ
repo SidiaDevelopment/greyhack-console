@@ -1,0 +1,18 @@
+__CMD__ = "$1"
+__USAGE__ = __CMD__
+__DESCRIPTION__ = ""
+__ALIAS__ = []
+__CATEGORY__ = ""
+
+$1Cmd = {}
+$1Cmd.cmd = __CMD__
+$1Cmd.usage = __USAGE__
+$1Cmd.description = __DESCRIPTION__
+$1Cmd.alias = __ALIAS__
+$1Cmd.category = __CATEGORY__
+
+$1Cmd.execute = function(args)
+	
+end function
+
+cmdHandler.register(__CMD__, $1Cmd)

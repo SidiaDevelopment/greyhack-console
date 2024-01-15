@@ -1,0 +1,52 @@
+__CMD__ = "ls"
+__USAGE__ = __CMD__ + " (path)"
+__DESCRIPTION__ = "List files in current directory or (path)"
+__CATEGORY__ = "Files"
+
+lsCmd = {}
+lsCmd.cmd = __CMD__
+lsCmd.usage = __USAGE__
+lsCmd.description = __DESCRIPTION__
+lsCmd.category = __CATEGORY__
+
+lsCmd.execute = function(args)
+	if args.len > 1 then
+		console.log(lsCmd.usage)
+		return
+	end if
+
+	computer = globals.currentConnection.computer
+	folderPath = globals.currentConnection.fileHandle.path
+	if args.len > 0 then
+		folderPath = args[params.len - 1]
+	end if
+	
+	folder = computer.File(folderPath)
+	if folder == null then
+		print("No such file or directory")
+	else
+		if not folder.has_permission("r") then
+			print("Permission denied")
+			return
+		end if
+
+		subFiles = folder.get_folders + folder.get_files
+		output = ""
+		for subFile in subFiles
+			nameFile = subFile.name
+			permission = subFile.permissions
+			owner = subFile.owner
+			size = subFile.size
+			group = subFile.group
+				
+			if output.len > 0 then 
+				output = output + "\n"
+			end if
+			output = output + colors.pollux(permission + " " + owner + " " + group + " " + size + " " + nameFile)
+		end for
+			
+		console.log(format_columns(output))
+	end if
+end function
+
+cmdHandler.register(__CMD__, lsCmd)

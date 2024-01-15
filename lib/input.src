@@ -1,0 +1,90 @@
+_transform = function(a) 
+	return a
+end function
+
+conditionalInput = function(text, condition, transform = _transform, password = false, oneKey = false)
+	value = ""
+	check = false
+	while check == false
+		value = console.prompt(text, password, oneKey)
+	
+		check = condition(value)
+	end while
+
+	return transform(value)
+end function
+
+listInput = function(text, valid, lines, password = false, oneKey = false)
+	value = ""
+	check = false
+	while check == false
+		for i in range(0, lines.len - 1)
+			line = lines[i]
+			console.log(colors.pollux2("<b>["+valid[i]+"]</b> ") + line, false)
+		end for
+		value = console.prompt(text, password, oneKey)
+		
+		check = valid.indexOf(value) != null
+	end while
+
+	return value
+end function
+
+listSelection = function(text, options, hasQuit = false)
+	value = null
+	
+	tokens = []
+	for i in range(0, options.len - 1)
+		tokens.push((i+1) + "")
+	end for
+
+	if hasQuit then tokens.push("q")
+	
+	check = false
+	while check == false
+		for i in range(0, options.len - 1)
+			option = options[i]
+			console.log(colors.pollux2("<b>["+tokens[i]+"]</b> ") + option.label, false)
+		end for
+	
+		if hasQuit then
+			console.log(colors.pollux2("<b>[q]</b> ") + "Quit", false)
+		end if
+	
+		value = console.prompt(text, false, tokens.len < 10)
+		check = tokens.indexOf(value) != null
+	end while
+	
+	if value == "q" then return null
+	return options[tokens.indexOf(value)].value
+end function
+
+conditionalLoggerInput = function(text, condition, transform = _transform, password = false, oneKey = false)
+	value = ""
+	check = false
+	while check == false
+		value = logger.input(text, password, oneKey)
+	
+		check = condition(value)
+	end while
+
+	return transform(value)
+end function
+
+yesAnswers = ["y", "Y"]
+noAnswers = ["n", "N"]
+
+yesNoCondition = function(value)
+	return yesAnswers.indexOf(value) != null or noAnswers.indexOf(value) != null
+end function
+
+yesNoTransform = function(value)
+	return yesAnswers.indexOf(value) != null
+end function
+
+
+
+
+
+
+

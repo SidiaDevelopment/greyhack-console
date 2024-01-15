@@ -1,0 +1,138 @@
+getConnection = function(_connection, publicIp = null, localIp = null)
+	connection = {
+		"shell": null,
+		"computer": null,
+		"publicIp": null,
+		"localIp": null,
+		"raw": _connection,
+	}
+	
+	if typeof(_connection) == "shell" then
+		connection.shell = _connection
+	end if
+
+	if typeof(_connection) == "computer" then
+		connection.computer = _connection
+	end if
+
+	if typeof(_connection) == "file" then
+		connection.fileHandle = _connection
+	end if	
+	
+	if connection.shell != null then 
+		connection.computer = connection.shell.host_computer()
+	end if
+	
+	if connection.computer != null then
+		connection.fileHandle = connection.computer.File("/")
+		connection.publicIp = connection.computer.public_ip()
+		connection.localIp = connection.computer.local_ip()
+	end if
+
+	if connection.publicIp == null then connection.publicIp = publicIp
+	if connection.localIp == null then connection.localIp = localIp
+	
+	connection.user = getUserForConnection(connection)
+	return connection
+end function
+
+getUserForConnection = function(_connection)
+	file = _connection.fileHandle
+	rootFolder = getRelativeFolder(file, "/")
+	homeFolder = getRelativeFolder(file, "/home")
+	
+	if rootFolder.has_permission("w") then
+		_connection.fileHandle = getRelativeFolder(rootFolder, "root")
+		return "root"
+	end if
+	
+	users = homeFolder.get_folders()
+	for user in users
+		if user.name == "guest" then continue
+		
+		userFolder = getRelativeFolder(homeFolder, user.name)
+		if userFolder.has_permission("w") then
+			_connection.fileHandle = userFolder
+			return user.name
+		end if
+	end for
+	
+	return "guest"
+end function
+
+globals.activeConnections = {}
+globals.activeConnection = []
+
+init = function(connection)
+	globals.activeConnections = {
+		"connection": connection,
+		"children": {},
+	}
+	globals.currentConnection = connection
+	connection.hash = [] + globals.activeConnection
+end function
+
+connect = function(connection, _par = null)
+	hashes = globals.activeConnection
+	if _par != null then
+		hashes = _par.hash
+	end if
+	
+	par = globals.activeConnections
+	for hs in hashes
+		par = par.children[hs]
+	end for
+
+	h = hash(rnd + current_date)
+
+	par.children[h] = {
+		"connection": connection,
+		"children": {},
+	}
+	globals.activeConnection.push(h)
+	connection.hash = [] + globals.activeConnection
+	globals.currentConnection = connection
+end function
+
+changeConnection = function(hashes)
+	globals.activeConnection = [] + hashes
+	cur = globals.activeConnections
+	for hs in globals.activeConnection
+		cur = cur.children[hs]
+	end for
+
+	globals.currentConnection = cur.connection
+end function
+
+disconnectCurrent = function()
+	par = globals.activeConnections
+	for hash in globals.activeConnection[:-1]
+		par = par.children[hash]
+	end for
+
+	par.children.remove(globals.activeConnection.pop())
+	globals.currentConnection = par.connection
+end function
+
+colorConnectionType = function(text)
+	if text == "shell" then
+		return "<color=#eb4034>" + text + "</color>"
+	end if
+	if text == "computer" then
+		return colors.pollux2(text)
+	end if
+	if text == "file" then
+		return "<color=#34eb34>" + text + "</color>"
+	end if
+	return text
+end function
+
+colorConnectionLevel = function(text)
+	if text == "root" then
+		return "<color=#eb4034>" + text + "</color>"
+	end if
+	if text == "guest" then
+		return "<color=#34eb34>" + text + "</color>"
+	end if
+	return colors.pollux2(text)
+end function

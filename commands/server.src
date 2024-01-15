@@ -1,0 +1,107 @@
+__CMD__ = "server"
+__USAGE__ = __CMD__ + " (ip/path) (path)"
+__DESCRIPTION__ = "Connect to owned server"
+__CATEGORY__ = "Servers"
+
+serverCmd = {}
+serverCmd.cmd = __CMD__
+serverCmd.usage = __USAGE__
+serverCmd.description = __DESCRIPTION__
+serverCmd.category = __CATEGORY__
+
+serverCmd.execute = function(args)
+	user = localConnection.user
+	ip = null
+	
+	if user == "root" and ((args.len < 2 and is_valid_ip(args[1])) or args.len < 1) then 
+		console.log("Please add a path to a user directory if you are operating as root")
+		return
+	end if
+
+	mapPath = "/home/" + user + "/Config/Map.conf"
+	if args.len >= 2 then
+		if not is_valid_ip(args[0]) then
+			console.log("Please enter a valid IP")
+			return
+		end if
+		ip = args[0]
+		mapPath = args[1] + "/Config/Map.conf"
+	end if
+
+	if args.len == 1 then
+		if not is_valid_ip(args[0]) then
+			console.log("Please enter a valid IP")
+			return
+		end if
+		ip = args[0]
+	end if
+	
+	mapFile = localConnection.computer.File(mapPath)
+	if mapFile == null then
+		console.log("No saved servers in map or could not find <b>Map.conf</b>")
+		return
+	end if
+	
+	map = Json.parse(mapFile.get_content())
+	ip = _getServerSelection(ip, map)
+	
+	if ip == null then
+		return
+	end if
+	
+	server = null
+	for i in range(0, map.accounts.len - 1)
+		_server = map.accounts[i]
+		if _server.ip == ip then
+			server = _server
+			break
+		end if
+	end for
+	
+	if server == null then
+		console.log("Server not found")
+		return
+	end if
+	
+	sh = localConnection.shell
+	connection = sh.connect_service(server.ip, 22, server.user, server.password)
+	
+	if connection == null then
+		console.log("Could not establish connection")
+		return
+	end if
+	
+	console.log("Connection to " + console.bold(anonIp(server.ip, 2)) + " established")
+	connect(getConnection(connection), localConnection)
+end function
+
+_getServerSelection = function(ip, map)
+
+	if ip == null then
+		text = ""
+		serverChoiceBinding = {}
+		possibilities = []
+		lines = []
+		for i in range(0, map.accounts.len - 1)
+			server = map.accounts[i]
+			lines.push(anonIp(server.ip, 2))
+			serverChoiceBinding["" + (i + 1)] = server.ip
+			possibilities.push("" + (i + 1))
+		end for
+		lines.push("Quit")
+		possibilities.push("q")
+		
+		serverInput = listInput("Which server do you want to select?", possibilities, lines, false, map.accounts.len < 10)
+		if serverInput == "q" then return
+
+		ip = serverChoiceBinding[serverInput]
+	end if
+
+	if not is_valid_ip(ip) then
+		console.log("Not a valid IP")
+		return null
+	end if
+
+	return ip
+end function
+cmdHandler.register(__CMD__, serverCmd)

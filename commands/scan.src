@@ -1,0 +1,54 @@
+__CMD__ = "scan"
+__USAGE__ = __CMD__ + " [IP]"
+__DESCRIPTION__ = "Scan [IP] for exploits"
+__CATEGORY__ = "CySec"
+
+scanCmd = {}
+scanCmd.cmd = __CMD__
+scanCmd.usage = __USAGE__
+scanCmd.description = __DESCRIPTION__
+scanCmd.category = __CATEGORY__
+
+scanCmd.execute = function(args)
+	if args.len < 1 then
+		console.log(scanCmd.usage)
+		return
+	end if
+
+	ip = args[0]
+	metax = loadLib("metaxploit.so")
+
+	ports = get_router(ip).used_ports
+	portNumbers = [0]
+	for port in ports
+		portNumbers.push(port.port_number)
+	end for
+
+	console.log("<u><b>Public lib scan</b></u>")
+	for port in portNumbers
+		netSession = metax.net_use(ip, port)
+		if netSession == null then continue
+
+		metaLib = netSession.dump_lib()
+		
+		scanResults = metax.scan(metaLib)
+		exploits = []
+		for target in scanResults
+			scanAddress = metax.scan_address(metaLib, target)
+			segments = scanAddress.split("Unsafe check: ")[1:]
+ 			for segment in segments
+   				hasRequirement = false
+   				if (not hasRequirement) then
+      				labelStart = segment.indexOf("<b>")
+      				labelEnd = segment.indexOf("</b>")
+      				exploits.push([target, segment[labelStart + 3: labelEnd]])
+				end if
+			end for
+		end for
+		console.log(metaLib.lib_name + " - v" + metaLib.version + ": Found " + exploits.len + " exploits on port " + port)
+	end for
+
+	console.rebuild()
+end function
+
+cmdHandler.register(__CMD__, scanCmd)

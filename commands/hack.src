@@ -1,0 +1,79 @@
+__CMD__ = "hack"
+__USAGE__ = __CMD__ + " [IP]"
+__DESCRIPTION__ = "Exploit an IP"
+__CATEGORY__ = "CySec"
+
+hackCmd = {}
+hackCmd.cmd = __CMD__
+hackCmd.usage = __USAGE__
+hackCmd.description = __DESCRIPTION__
+hackCmd.category = __CATEGORY__
+
+hackCmd.execute = function(args)
+	metax = loadLib("metaxploit.so")
+	
+	if args.len < 1 then
+		console.log("No IP provided")
+		return
+	end if
+	
+	ip = args[0]
+	if not is_valid_ip(ip) then
+		console.log("Invalid IP")
+		return
+	end if
+	router = get_router(ip)
+	_ports = router.used_ports
+	ports = [{
+		"portNum": 0,
+		"localIp": router.local_ip,
+	}]
+	for port in _ports
+		if port.is_closed() then continue
+		ports.push({
+			"portNum": port.port_number,
+			"localIp": router.local_ip,
+		})
+	end for
+
+	options = []
+	for port in ports
+		netSession = metax.net_use(ip, port.portNum)
+		if netSession == null then continue
+		metaLib = netSession.dump_lib()
+		scanResults = metax.scan(metaLib)
+		exploits = []
+		for target in scanResults
+			scanAddress = metax.scan_address(metaLib, target)
+			segments = scanAddress.split("Unsafe check: ")[1:]
+ 			for segment in segments
+      			labelStart = segment.indexOf("<b>")
+      			labelEnd = segment.indexOf("</b>")
+      			exploits.push([target, segment[labelStart + 3: labelEnd]])
+			end for
+		end for
+		
+		combos = []
+		for exploit in exploits
+			result = metaLib.overflow(exploit[0], exploit[1], "192.168.0.1")
+			if typeof(result) == "shell" or typeof(result) == "computer" or typeof(result) == "file" then
+				connection = getConnection(result, ip, port.localIp)
+				comboString = typeof(result) + ":" + connection.user
+				if combos.indexOf(comboString) != null then continue
+				
+				combos.push(comboString)
+				options.push({
+					"label": colors.gray("[") + colorConnectionType(typeof(result)) + colors.gray("] ") + colorConnectionLevel(connection.user) + colors.gray("@") + connection.localIp + colors.gray(":") + port.portNum + colors.gray(" - ") + console.alpha20(metaLib.lib_name),
+					"value": connection,
+				})
+			end if
+		end for
+		console.rebuild()
+	end for
+	console.rebuild()
+	newConnection = listSelection("Select exploit", options, true)
+	if newConnection == null then return
+	connect(newConnection)
+end function
+
+cmdHandler.register(__CMD__, hackCmd)

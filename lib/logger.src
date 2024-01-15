@@ -1,0 +1,23 @@
+buildLogger = function(name)
+	logger = {}
+	logger.log = function(text="")
+		print(colors.green("<b>"+name+":</b> ") + text)
+	end function
+
+	logger.info = function(text="")
+		print(colors.yellow("<b>"+name+":</b> ") + text)
+	end function
+
+	logger.error = function(text="")
+		print(colors.red("<b>"+name+":</b> ") + text)
+	end function
+
+	logger.input = function(text="", pass=false, oneKey= false)
+		return user_input(colors.yellow("<b>"+name+":</b> ") + text, pass, oneKey)
+	end function
+
+	logger.anyKey = function()
+		user_input(colors.yellow("<b>"+name+":</b> ") + "Press any key to continue...", false, true)
+	end function
+	return logger
+end function

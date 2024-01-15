@@ -1,0 +1,22 @@
+__CMD__ = "shell"
+__USAGE__ = __CMD__
+__DESCRIPTION__ = "Launch shell on target system"
+__CATEGORY__ = "CySec"
+
+shellCmd = {}
+shellCmd.cmd = __CMD__
+shellCmd.usage = __USAGE__
+shellCmd.description = __DESCRIPTION__
+shellCmd.category = __CATEGORY__
+
+shellCmd.execute = function(args)
+	sh = globals.currentConnection.shell
+	if sh == null then
+		console.log("Only available in shell mode")
+		return
+	end if
+	
+	sh.start_terminal()
+end function
+
+cmdHandler.register(__CMD__, shellCmd)

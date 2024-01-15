@@ -1,0 +1,16 @@
+__CMD__ = "help"
+__USAGE__ = __CMD__
+__DESCRIPTION__ = "List usage for all commands"
+__CATEGORY__ = "Misc."
+
+helpCmd = {}
+helpCmd.cmd = __CMD__
+helpCmd.usage = __USAGE__
+helpCmd.description = __DESCRIPTION__
+helpCmd.category = __CATEGORY__
+
+helpCmd.execute = function(args)
+	cmdHandler.listHelp()
+end function
+
+cmdHandler.register(__CMD__, helpCmd)

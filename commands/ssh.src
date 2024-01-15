@@ -1,0 +1,49 @@
+__CMD__ = "ssh"
+__USAGE__ = __CMD__ + " [user]@[password] [IP] (port)"
+__DESCRIPTION__ = "List usage for all commands"
+__CATEGORY__ = "Servers"
+
+sshCmd = {}
+sshCmd.cmd = __CMD__
+sshCmd.usage = __USAGE__
+sshCmd.description = __DESCRIPTION__
+sshCmd.category = __CATEGORY__
+
+sshCmd.execute = function(args)
+	if args.len < 2 then
+		console.log(__USAGE__)
+		return
+	end if
+
+	if args[0].indexOf("@") == null then
+		console.log(__USAGE__)
+		return
+	end if
+
+	sh = currentConnection.shell
+	if sh == null then
+		console.log("Only available in shell mode")
+		return
+	end if
+	
+	up = args[0].split("@")
+	user = up[0]
+	pass = up[1]
+	ip = args[1]
+	port = 22
+	
+	if args.len >= 3 then
+		port = args[2].to_int()
+	end if
+	
+	connection = sh.connect_service(ip, 22, user, pass)
+	if connection == null then
+		console.log("Connection failed")
+		return
+	else
+		console.log("Connection to " + console.bold(anonIp(ip, 2)) + " established")
+	end if
+	connect(getConnection(connection))
+end function
+
+cmdHandler.register(__CMD__, sshCmd)

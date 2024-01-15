@@ -1,0 +1,17 @@
+__CMD__ = "clear"
+__USAGE__ = __CMD__
+__DESCRIPTION__ = "Clear console"
+__CATEGORY__ = "Misc."
+
+clearCmd = {}
+clearCmd.cmd = __CMD__
+clearCmd.usage = __USAGE__
+clearCmd.description = __DESCRIPTION__
+clearCmd.category = __CATEGORY__
+
+clearCmd.execute = function(args)
+	clear_screen()
+	console.history = []
+end function
+
+cmdHandler.register(__CMD__, clearCmd)

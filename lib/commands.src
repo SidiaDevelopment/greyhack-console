@@ -1,0 +1,68 @@
+cmdHandler = {}
+
+cmdHandler.commands = {}
+cmdHandler.parse = function(_cmd)
+	parts = _cmd.split(" ")
+	ret = {}
+	ret.cmd = parts[0]
+	ret.args = parts[1:]
+	return ret
+end function
+
+cmdHandler.register = function (name, class)
+	cmdHandler.commands[name] = class
+	if not class.hasIndex("alias") or typeof(class.alias) != "list" then return
+	
+	for alias in class.alias
+		cmdHandler.commands[alias] = class
+	end for
+end function
+
+cmdHandler.listHelp = function()
+	categories = {}
+	for cmdKv in cmdHandler.commands
+		if cmdKv.key != cmdKv.value.cmd then continue
+		category = cmdKv.value.category
+		if not categories.hasIndex(category) then categories[category] = []
+		
+		categories[category].push(cmdKv.value)
+	end for
+	
+	for categoryKv in categories
+		categoryName = categoryKv.key
+		categoryElements = categoryKv.value
+		console.log(console.bold(colors.pollux2(console.underline(categoryName))))
+		for cmd in categoryElements
+			alias = ""
+			if cmd.hasIndex("alias") and cmd.alias.len > 0 then 
+				alias = "Alias: " + cmd.alias.join(", ")
+			end if
+			console.log("<b>"+cmd.usage+"</b>")
+			console.log(cmd.description)
+			if alias.len > 0 then console.log(console.alpha50(alias))
+			console.log("")
+		end for
+	end for
+end function
+
+cmdHandler.execute = function(name, args)
+	hasCmd = cmdHandler.commands.hasIndex(name)
+	if hasCmd then
+		cmdHandler.commands[name].execute(args)
+		return
+    end if
+
+	if currentConnection.shell == null then
+		console.log("Only available in shell mode, no access to /bin")
+	end if
+	
+	binFile = currentConnection.computer.File("/bin/" + name)
+	if binFile == null then
+		console.log("Command not found")
+		return
+	end if
+	
+	currentConnection.shell.launch("/bin/" + name, args.join(" "))
+end function
+
+get_custom_object.cmdHandler = cmdHandler

@@ -1,0 +1,17 @@
+anonIp = function(ip, depth = 1)
+	if is_valid_ip(ip) == false then
+		return ip
+	end if
+	
+	s = ip.split("\.")
+	ipString = ""
+	for i in range(0, 3)
+		if i >= depth then
+			ipString = ipString + ".*"
+			continue
+		end if
+		
+		ipString = ipString + "." + s[i]
+	end for
+	return ipString[1:]
+end function
