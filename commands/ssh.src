@@ -1,6 +1,6 @@
 __CMD__ = "ssh"
 __USAGE__ = __CMD__ + " [user]@[password] [IP] (port)"
-__DESCRIPTION__ = "List usage for all commands"
+__DESCRIPTION__ = "Connect to a server using ssh"
 __CATEGORY__ = "Servers"
 
 sshCmd = {}
